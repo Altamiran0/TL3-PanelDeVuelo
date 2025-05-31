@@ -1,1 +1,1 @@
-export { default as InstrumentosDeNavegacion } from './InstrumentosDeNavegacion/InstrumentosDeNavegacion';
+export { default as InstrumentalNav } from './InstrumentalNav/instrumentalNav';
