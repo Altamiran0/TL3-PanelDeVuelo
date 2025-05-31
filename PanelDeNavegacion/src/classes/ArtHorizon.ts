@@ -87,27 +87,27 @@ export class ArtHorizon {
 
          ctx.lineWidth = 3;
 
-         if ( graduations[ index ] === 0 ) {
-            ctx.lineWidth = 5;            
-            rollInd_graduation.moveTo( cos_1 * ( radius - 15 ), sen_1 * ( radius - 15 ));
-            rollInd_graduation.lineTo( cos_1 * ( radius - 40 ), sen_1 * ( radius - 40 ));
-            ctx.stroke( rollInd_graduation );
-         }     
-
          if( graduations[ index ] === 45 ) {
             rollInd_graduation.moveTo( cos_1 * ( radius - 25 ), sen_1 * ( radius - 25 ));
             rollInd_graduation.arc( cos_1 * ( radius - 25 ), sen_1 * ( radius - 25 ), 5, 0, 2 * Math.PI );
             ctx.fill( rollInd_graduation );
-         }
-
-         if ( graduations[ index ] === 10 || graduations[ index ] === 20 ) {
-            rollInd_graduation.moveTo( cos_1 * ( radius - 15 ), sen_1 * ( radius - 15 ));
-            rollInd_graduation.lineTo( cos_1 * ( radius - 30 ), sen_1 * ( radius - 30 ));
-            ctx.stroke( rollInd_graduation );
          } else {
-            rollInd_graduation.moveTo( cos_1 * ( radius - 15 ), sen_1 * ( radius - 15 ));
-            rollInd_graduation.lineTo( cos_1 * ( radius - 40 ), sen_1 * ( radius - 40 ));
-            ctx.stroke( rollInd_graduation );
+            if ( graduations[ index ] === 0 ) {
+               ctx.lineWidth = 5;            
+               rollInd_graduation.moveTo( cos_1 * ( radius - 15 ), sen_1 * ( radius - 15 ));
+               rollInd_graduation.lineTo( cos_1 * ( radius - 40 ), sen_1 * ( radius - 40 ));
+               ctx.stroke( rollInd_graduation );
+            } else {
+               if ( graduations[ index ] === 10 || graduations[ index ] === 20 ) {
+                  rollInd_graduation.moveTo( cos_1 * ( radius - 15 ), sen_1 * ( radius - 15 ));
+                  rollInd_graduation.lineTo( cos_1 * ( radius - 30 ), sen_1 * ( radius - 30 ));
+                  ctx.stroke( rollInd_graduation );
+               } else {
+                  rollInd_graduation.moveTo( cos_1 * ( radius - 15 ), sen_1 * ( radius - 15 ));
+                  rollInd_graduation.lineTo( cos_1 * ( radius - 40 ), sen_1 * ( radius - 40 ));
+                  ctx.stroke( rollInd_graduation );
+               }
+            }
          }
       }
       ctx.restore();
