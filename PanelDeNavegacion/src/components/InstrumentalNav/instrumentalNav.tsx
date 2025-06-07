@@ -1,8 +1,17 @@
 import { useEffect } from "preact/hooks";
-import { Anemometer, ArtHorizon } from "../../classes";
+import { Anemometer, AptitudIndicator, Altimeter } from "../../classes";
 import "./InstrumentalNav.css"; 
 
 function InstrumentalNav() {
+   /* 
+      Posibles mejoras:
+         Perilla de ajuste de HA.
+         Perilla de ajuste de presion referencial Altimetro.
+         Un gradiente para darle profundidad al circulo central del HA.
+         Bandera de los 10k para el altimetro.
+         Darle profundidad a los instrumentos.
+   */
+
    useEffect(() => {
       const canvas = document.querySelector('#canvas') as HTMLCanvasElement;
       if( !canvas ) return;
@@ -19,24 +28,19 @@ function InstrumentalNav() {
       });      
       anemometer.draw();
 
-      const artHorizon = new ArtHorizon({
+      const aptitudIndicator = new AptitudIndicator({
          ctx,
          posX: ( radius * 3 ) + 5,
          posY: radius 
       });      
-      artHorizon.draw();
+      aptitudIndicator.draw();
 
-      // const anemometer3 = new Anemometer({
-      //    ctx,
-      //    radius,
-      //    posX: ( radius * 5 ) + 10,
-      //    posY: radius 
-      // });      
-      // anemometer3.draw();
-
-      // setInterval(() => {
-      //    anemometer.updateValue( 30 );
-      // }, 1000);
+      const altimeter = new Altimeter({
+         ctx,
+         posX: ( radius * 5 ) + 10,
+         posY: radius 
+      });      
+      altimeter.draw();
    }, []);
 
    return(

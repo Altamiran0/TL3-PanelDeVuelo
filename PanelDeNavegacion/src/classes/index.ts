@@ -1,2 +1,3 @@
 export * from "./Anemometer";
-export * from "./ArtHorizon";
+export * from "./AptitudIndicator";
+export * from "./Altimeter";

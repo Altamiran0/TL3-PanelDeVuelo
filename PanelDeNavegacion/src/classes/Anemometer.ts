@@ -4,9 +4,9 @@ import { angARad } from "../services";
 export class Anemometer {
    private ctx: CanvasRenderingContext2D;
    private radius = 135;
-   private maxValue = 50;
    private posX: number;
    private posY: number;
+   private speed = 0;
 
    constructor({ ctx, posX, posY }: InstrumentalProps) {
       this.ctx = ctx;
@@ -14,20 +14,21 @@ export class Anemometer {
       this.posY = posY;
    }
 
-   drawBase() {
+   private drawStaticFrame() {
       const { ctx, radius, posX, posY } = this;
-      const border = new Path2D();
-      border.arc( posX, posY, radius, 0, Math.PI * 2 );
-      ctx.fillStyle = '#000';
-      ctx.fill( border );
 
-      const background = new Path2D();
-      background.arc( posX, posY, (radius - 10 ), 0, Math.PI * 2 );
-      ctx.fillStyle = '#222';
-      ctx.fill( background );
+      ctx.beginPath();
+      ctx.arc( posX, posY, radius, 0, Math.PI * 2 );
+      ctx.fillStyle = 'black';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc( posX, posY, (radius - 10 ), 0, Math.PI * 2 );
+      ctx.fillStyle = '#151515';
+      ctx.fill();  
    };
 
-   drawArcs() {
+   private drawArcs() {
       const { ctx, radius, posX, posY } = this;
       const colors = [ '#e3dc1e', '#3ea30b', '#fff' ];
       const arcRadius = radius - 15;
@@ -50,7 +51,7 @@ export class Anemometer {
       ctx.stroke( whiteArc );
    };
 
-   drawGraduation() {
+   private drawGraduation() {
       const { ctx, radius, posX, posY } = this;
 
       const totalGrad = 38;
@@ -85,22 +86,23 @@ export class Anemometer {
             posY + sin * rEnd
          );
          ctx.stroke();
-      }
+      };
    };
 
-   drawNumbers() {      
-      const { ctx, radius, maxValue, posX, posY } = this;
+   private drawNumbers() {      
+      const { ctx, radius, posX, posY } = this;
+      const maxValue = 50;
       const startRad = angARad(-70);
       const endRad = angARad(250);
       const count = 10;
       const step = ( endRad - startRad ) / ( count - 1 );  
 
       ctx.fillStyle = '#fff';
-      ctx.font = '16px system-ui';
+      ctx.font = '700 26px system-ui';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const textRadius = radius - 45;
+      const textRadius = radius - 50;
 
       for (let i = 0; i < count; i++) {
          const ang = startRad + step * i;
@@ -113,34 +115,34 @@ export class Anemometer {
          const value = Math.round(( maxValue / count ) * ( i + 1 ));
 
          ctx.fillText( value.toString(), x, y );
-      }
+      };
    };
 
-   drawLegends() {
+   private drawLegends() {
       const { ctx, posX, posY } = this;
-      ctx.font = '14px';
-      ctx.fillText( 'AIR SPEED', posX, posY - 35 );
-      ctx.fillText( 'MPS', posX, posY + 35 );
+      
+      ctx.font = '16px system-ui';
+      ctx.fillText( 'AIR SPEED', posX, posY - 30 );
+      ctx.fillText( 'M/H', posX, posY + 30 );
    };
    
-   drawNeedle( currentValue: number ) {
-      const { ctx, radius, posX, posY } = this;
+   private drawNeedle() {
+      const { ctx, posX, posY, speed } = this;
       const maxValue = 51.25;
       const scaleChangeValue = 5;
-      let ang = 0;
+      let valueAng = 0;
 
-      if( currentValue < scaleChangeValue ) {
-         const effectiveValue = Math.max( 0, currentValue );
+      if( speed < scaleChangeValue ) {
+         const effectiveValue = Math.max( 0, speed );
 
          const startDeg = -80;
          const endDeg = -70;
          const totalDeg = endDeg - startDeg;
    
-         const valueRange = scaleChangeValue;
-         const deg = startDeg + ( effectiveValue / valueRange ) * totalDeg;
-         ang = angARad( deg );
+         const deg = startDeg + ( effectiveValue / scaleChangeValue ) * totalDeg;
+         valueAng = angARad( deg );
       } else {
-         const effectiveValue = Math.min( currentValue, maxValue );
+         const effectiveValue = Math.min( speed, maxValue );
 
          const startDeg = -70;
          const endDeg = 260;
@@ -148,36 +150,42 @@ export class Anemometer {
   
          const valueRange = maxValue - scaleChangeValue;
          const deg = startDeg + (( effectiveValue - scaleChangeValue ) / valueRange ) * totalDeg;
-         ang = angARad( deg );
-      }     
+         valueAng = angARad( deg );
+      };
       
-      const cos = Math.cos( ang ), sin = Math.sin( ang );
+      ctx.save();
+      ctx.translate( posX, posY );
+      ctx.rotate( valueAng );
       ctx.strokeStyle = '#f00';
-      ctx.lineWidth = 2;
-      ctx.moveTo(posX, posY);
-      ctx.lineTo(posX + cos * (radius - 30), posY + sin * (radius - 30));
+      ctx.lineWidth = 4;
+
+      ctx.beginPath();
+      ctx.moveTo( 4, 10 );
+      ctx.lineTo( 100, 0 );
+      ctx.lineTo( 5, -10 );
+      ctx.lineTo( -20, 0 );
+      ctx.closePath()
       ctx.stroke();
+
+      ctx.restore();
+
    };
 
-   drawStaticLayer() {
-      this.drawBase();
+   public draw() {
+      this.drawStaticFrame();
       this.drawArcs();
       this.drawGraduation();
       this.drawNumbers();
       this.drawLegends();
-   }
+      this.drawNeedle();
+   };
 
-   updateValue( newValue: number ) {
-      const { ctx, radius } = this;
-      const diameter = radius * 2;
-      ctx.clearRect( 0, 0, diameter, diameter );
+   private set setSpeed( speed: number ) {
+      this.speed = speed;
+   };
 
-      this.drawStaticLayer();
-      this.drawNeedle( newValue );
-   }
-
-   draw() {
-      this.drawStaticLayer();
-      this.drawNeedle( 0 );
-   }
+   public updateAnemometer( speed: number ) {
+      this.setSpeed = speed;
+      this.draw();
+   };
 }
