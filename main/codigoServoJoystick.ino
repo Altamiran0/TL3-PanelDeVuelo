@@ -1,4 +1,4 @@
-// Codigo fuente del arduino uno para manejar servos con el joystick
+// Codigo fuente del arduino uno para manejar los servos con el joystick
 
 #include <Wire.h>  // librería para comunicaciones con el pc
 #include <Servo.h> // librería para los servos
@@ -21,19 +21,19 @@ Servo motor_y; // creamos el objeto que manejara el eje Y
 void setup()
 {
 
-    motor_x.attach(PIN_servo_x); // le asignamos al servo_x los valores del PIN que controla el eje X
-    motor_y.attach(PIN_servo_y); // le asignamos al servo_y los valores del PIN que controla el eje Y
+  motor_x.attach(PIN_servo_x); // le asignamos al servo_x los valores del PIN que controla el eje X
+  motor_y.attach(PIN_servo_y); // le asignamos al servo_y los valores del PIN que controla el eje Y
 }
 
 void loop()
 {
-    x = analogRead(PIN_VRx); // Leemos el valor de X del joystick
-    y = analogRead(PIN_VRy); // Leemos el valor de Y del joystick
+  x = analogRead(PIN_VRx); // Leemos el valor de X del joystick
+  y = analogRead(PIN_VRy); // Leemos el valor de Y del joystick
 
-    // mapeamos los valores del joystick a grados para los servos
-    servo_x = map(x, 0, 1023, 0, 180);
-    servo_y = map(y, 0, 1023, 0, 180);
+  // mapeamos los valores del joystick a grados para los servos
+  servo_x = map(x, 0, 1023, 0, 180);
+  servo_y = map(y, 0, 1023, 0, 180);
 
-    motor_x.write(servo_x); // le pasamos los grados al servo del eje X
-    motor_y.write(servo_y); // le pasamos los grados al servo del eje Y
+  motor_x.write(servo_x); // le pasamos los grados al servo del eje X
+  motor_y.write(servo_y); // le pasamos los grados al servo del eje Y
 }
