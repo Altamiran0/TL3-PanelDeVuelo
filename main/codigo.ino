@@ -1,88 +1,72 @@
 #include <Wire.h>
 #include <Adafruit_BMP280.h>
-#include <MPU6050.h>
-#include <Servo.h>
+#include <TinyGPS++.h>
 #include <SoftwareSerial.h>
+#include <MPU6050.h>
 
-#define JOYSTICK_X A0
-#define JOYSTICK_Y D3
-#define BOTON_JOYSTICK D4
+#define RX_GPS D7
+#define TX_GPS D8
 
-Servo servoX, servoY;
-Adafruit_BMP280 sensorPresionAltitud;
-MPU6050 sensorMovimiento;
-SoftwareSerial gpsSerial(D7, D8);
+Adafruit_BMP280 bmp;
+TinyGPSPlus gps;
+SoftwareSerial gpsSerial(RX_GPS, TX_GPS);
+MPU6050 mpu;
+
+int16_t ax, ay, az; // Aceleraciones
+int16_t gx, gy, gz; // Giroscopio
 
 void setup()
 {
   Serial.begin(115200);
   Wire.begin();
-
-  if (!sensorPresionAltitud.begin(0x76))
-    Serial.println("Error: No se encontró el BMP280");
-  sensorMovimiento.initialize();
-  if (!sensorMovimiento.testConnection())
-    Serial.println("Error: No se encontró el MPU6050");
   gpsSerial.begin(9600);
 
-  pinMode(BOTON_JOYSTICK, INPUT_PULLUP);
+  Serial.println(" Iniciando sensores...");
 
-  servoX.attach(D5);
-  servoY.attach(D6);
+  // Inicializar BMP280
+  if (!bmp.begin(0x76))
+  {
+    Serial.println(" BMP280 no encontrado!");
+    while (1)
+      ;
+  }
+
+  // Inicializar MPU6050
+  mpu.initialize();
+  if (!mpu.testConnection())
+  {
+    Serial.println(" MPU6050 no encontrado!");
+    while (1)
+      ;
+  }
+
+  Serial.println("Sensores listos: BMP280 y MPU6050.");
 }
 
 void loop()
 {
-  int posicionX = analogRead(JOYSTICK_X);
-  int posicionY = analogRead(JOYSTICK_Y);
-  int estadoBoton = digitalRead(BOTON_JOYSTICK);
+  // Leer datos del GPS
+  while (gpsSerial.available())
+    gps.encode(gpsSerial.read());
 
-  //  Si el botón se presiona, resetear servos al centro
-  if (estadoBoton == LOW)
-  {
-    Serial.println(" Botón presionado: Reiniciando servos...");
-    servoX.write(90);
-    servoY.write(90);
-  }
-  else
-  {
-    //  Mapeo continuo de los servos con el joystick
-    int anguloServoX = map(posicionX, 0, 1023, 0, 180);
-    int anguloServoY = map(posicionY, 0, 1023, 0, 180);
-    servoX.write(anguloServoX);
-    servoY.write(anguloServoY);
-  }
+  //  Obtener datos de altitud y presión
+  float altitud = bmp.readAltitude(1013.25);
+  float presion = bmp.readPressure() / 100.0;
 
-  // Datos del BMP280
-  Serial.print("Presión: ");
-  Serial.print(sensorPresionAltitud.readPressure() / 100);
-  Serial.println(" hPa");
-  Serial.print("Altitud: ");
-  Serial.print(sensorPresionAltitud.readAltitude(1013.25));
-  Serial.println(" m");
+  //  Obtener aceleración y giroscopio del MPU6050
+  mpu.getAcceleration(&ax, &ay, &az);
+  mpu.getRotation(&gx, &gy, &gz);
 
-  // Datos del MPU6050
-  Serial.print("Ángulo X: ");
-  Serial.print(sensorMovimiento.getRotationX());
-  Serial.print(", Y: ");
-  Serial.print(sensorMovimiento.getRotationY());
-  Serial.print(", Z: ");
-  Serial.println(sensorMovimiento.getRotationZ());
+  Serial.print(" |  Altitud: ");
+  Serial.print(altitud);
+  Serial.print(" m | Presión: ");
+  Serial.print(presion);
+  Serial.print(" hPa |  Acc X: ");
+  Serial.print(ax);
+  Serial.print(" | Y: ");
+  Serial.print(ay);
+  Serial.print(" | Z: ");
+  Serial.println(az);
 
-  // Datos del GPS
-  if (gpsSerial.available())
-  {
-    Serial.print("GPS: ");
-    while (gpsSerial.available())
-    {
-      Serial.write(gpsSerial.read());
-    }
-    Serial.println();
-  }
-  else
-  {
-    Serial.println("GPS no disponible...");
-  }
-
-  delay(10);
+  delay(1000);
 }
