@@ -1,0 +1,10 @@
+.InstrumentalPanel {
+   display: grid;
+   place-content: center;
+   grid-template-columns: repeat( auto-fit, 275px );
+   min-width: 275px;
+   width: 50vw;
+   gap: 10px;
+
+   background-color: #ff0000;
+}

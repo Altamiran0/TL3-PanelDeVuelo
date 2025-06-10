@@ -1,9 +1,9 @@
-import { InstrumentalNav  } from "./components";
+import { InstrumentalPanel } from "./components";
 
 export function App() {
   return (
     <>
-      <InstrumentalNav />
+    <InstrumentalPanel />
     </>
   )
-}
+};

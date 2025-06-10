@@ -1,120 +1,119 @@
-import type { InstrumentalProps } from "../interfaces";
-import { angARad } from "../services";
+import type { CenterPoint, ConstructorProps } from "../interfaces";
+import { angARad, colors } from "../services";
 
 type TickType = 'tickZero' | 'dot' | 'tickSmall' | 'tickLarge';
 
 export class AptitudIndicator {
    private ctx: CanvasRenderingContext2D;
-   private radius = 135;
+   private radius: number;
+   private center: CenterPoint;
+
    private gradient: CanvasGradient;
-   private posX: number;
-   private posY: number;
    private rollAngle = 0;
    private pitchAngle = 0;
 
-   constructor({ ctx, posX, posY }: InstrumentalProps) {
+   constructor({ ctx, size }: ConstructorProps) {
       this.ctx = ctx;
-      this.posX = posX;
-      this.posY = posY;
+      this.radius = size / 2;
+      this.center = {
+         x: this.radius,
+         y: this.radius
+      };
 
-      // Creo y guardo el gradiente.
-
-      const { radius } = this; 
-
-      const colors = [ '#2d6def', '#aa5a0b' ];      
-      const gradient = ctx.createLinearGradient( 0, - radius, 0, radius );
-      gradient.addColorStop( 0, colors[ 0 ] );
-      gradient.addColorStop( 0.5, colors[ 0 ] );
-      gradient.addColorStop( 0.5, colors[ 1 ] );
-      gradient.addColorStop( 1, colors[ 1 ] );
+      const gradient = ctx.createLinearGradient( 0, - this.radius, 0, this.radius );
+      gradient.addColorStop( 0, colors.sky );
+      gradient.addColorStop( 0.5, colors.sky );
+      gradient.addColorStop( 0.5, colors.ground );
+      gradient.addColorStop( 1, colors.ground );
 
       this.gradient = gradient;
    };
 
    private drawStaticBG() {
-      const { ctx, radius, posX, posY } = this;
-      const bgColor = '#2d6def';
+      const { ctx, radius, center } = this;
 
       ctx.beginPath();
-      ctx.arc( posX, posY, ( radius - 5 ), 0, Math.PI * 2 );
-      ctx.fillStyle = bgColor;
+      ctx.arc( center.x, center.y, radius - 2, 0, Math.PI * 2 );
+      ctx.fillStyle = colors.sky;
       ctx.fill();
    };
 
    private drawStaticFrame() {
-      const { ctx, radius, posX, posY } = this;
+      const { ctx, radius, center } = this;
 
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 10;
+      ctx.strokeStyle = colors.border;
+      ctx.fillStyle = colors.border;
+
+      ctx.lineWidth = radius * 0.12;
       const border = new Path2D();
-      border.arc( posX, posY, ( radius - 5 ), 0, Math.PI * 2 );
+      border.arc( center.x, center.y, ( radius * 0.94), 0, Math.PI * 2 );
       ctx.stroke( border );
 
-      ctx.fillStyle = 'black';
-      ctx.lineWidth = 4;
+      ctx.lineWidth = radius * 0.03;
       const base = new Path2D();
-      base.arc( posX, posY, ( radius - 5 ), angARad( 40 ), angARad( 140 ));
+      base.arc( center.x, center.y, radius, angARad( 35 ), angARad( 145 ));
       base.closePath();
       ctx.fill( base );
 
-      ctx.strokeStyle = 'black';
       const plane = new Path2D();
-      plane.arc( posX, posY, 15, angARad( 0 ), angARad( 180 ));
+      plane.arc( center.x, center.y, ( radius * 0.12 ), angARad( 0 ), angARad( 180 ));
       ctx.stroke( plane );
 
+      ctx.strokeStyle = colors.plane;
+      ctx.fillStyle = colors.plane;
+
       const wingPlane = new Path2D();
-      wingPlane.moveTo( posX + 13, posY );
-      wingPlane.lineTo( posX + 40, posY );
-      wingPlane.moveTo( posX - 13, posY );
-      wingPlane.lineTo( posX - 40, posY );
+      wingPlane.moveTo( center.x + 13, center.y );
+      wingPlane.lineTo( center.x + 40, center.y );
+      wingPlane.moveTo( center.x - 13, center.y );
+      wingPlane.lineTo( center.x - 40, center.y );
       ctx.stroke( wingPlane );
       
       const planeDot = new Path2D();
-      ctx.fillStyle = 'black';
-      planeDot.arc( posX, posY, 4, angARad( 0 ), angARad( 360 ));
+      planeDot.arc( center.x, center.y, ( radius * 0.04 ), angARad( 0 ), angARad( 360 ));
       ctx.fill( planeDot );
 
+      ctx.strokeStyle = colors.arrow;
+      
       const triangle = new Path2D();
-      ctx.strokeStyle = '#f48303';
-      ctx.lineWidth = 4;
-      triangle.moveTo( posX, 35 );
-      triangle.lineTo( posX + 6, 55 );
-      triangle.lineTo( posX - 6, 55 );
+      triangle.moveTo( center.x, 35 );
+      triangle.lineTo( center.x + 6, 55 );
+      triangle.lineTo( center.x - 6, 55 );
       triangle.closePath();
       ctx.stroke(triangle);
    };
 
    private drawRollIndicatorBase() {
-      const { ctx, radius, gradient, posX, posY, rollAngle } = this;
+      const { ctx, radius, gradient, center, rollAngle } = this;
       const newPosX = 0, newPosY = 0;
       const baseWidth = 30;
 
       ctx.save();
 
-      ctx.translate( posX, posY );
+      ctx.translate( center.x, center.y );
       ctx.rotate( angARad( rollAngle ));
       ctx.strokeStyle = gradient;
       ctx.lineWidth = baseWidth;
 
       ctx.beginPath();
-      ctx.arc( newPosX, newPosY, radius - 25, angARad( 0 ), angARad( 360 ));
+      ctx.arc( newPosX, newPosY, ( radius * 0.8 ), angARad( 0 ), angARad( 360 ));
       ctx.stroke();
 
       ctx.strokeStyle = 'black';
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 2;
 
       ctx.beginPath();
-      ctx.arc( newPosX, newPosY, radius - 40, angARad( 0 ), angARad( 360 ));
+      ctx.arc( newPosX, newPosY, ( radius * 0.68 ), angARad( 0 ), angARad( 360 ));
       ctx.stroke();
 
       ctx.restore();
    };
 
    private drawRollIndicatorGraduation() {
-      const { ctx, radius, posX, posY, rollAngle } = this;
+      const { ctx, radius, center, rollAngle } = this;
       
       ctx.save();
-      ctx.translate( posX, posY );
+      ctx.translate( center.x, center.y );
       ctx.rotate( angARad( rollAngle ));
 
       const graduations: { angle: number, type: TickType }[] = [
@@ -126,11 +125,9 @@ export class AptitudIndicator {
          { angle:  60,  type: 'tickLarge' },
          { angle:  90,  type: 'tickLarge' }
       ];
-
-      // const rollInd_graduation = new Path2D();
             
-      ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'white';
+      ctx.fillStyle = colors.graduation;
+      ctx.strokeStyle = colors.graduation;
 
       const getVector = ( angle: number ) => {
          const offsetAngle = 90;
@@ -147,22 +144,24 @@ export class AptitudIndicator {
 
       const drawDot = ( X: number, Y: number ) => {
          ctx.beginPath();
-         ctx.moveTo( X * ( radius - 26 ), Y * ( radius - 26 ));
-         ctx.arc( X * ( radius - 26 ), Y * ( radius - 26 ), 7, 0, 2 * Math.PI );
+         ctx.moveTo( X * ( radius * 0.78 ), Y * ( radius * 0.78 ));
+         ctx.arc( X * ( radius * 0.78 ), Y * ( radius * 0.78 ), ( radius * 0.05 ), angARad( 0 ),angARad( 360 ));
          ctx.fill();
       };
 
       const drawTickSmall = ( X: number, Y: number ) => {
+         ctx.lineWidth = 2;
          ctx.beginPath();
-         ctx.moveTo( X * ( radius - 15 ), Y * ( radius - 15 ));
-         ctx.lineTo( X * ( radius - 30 ), Y * ( radius - 30 ));
+         ctx.moveTo( X * ( radius * 0.79 ), Y * ( radius * 0.79 ));
+         ctx.lineTo( X * ( radius * 0.69 ), Y * ( radius * 0.69 ));
          ctx.stroke();
       };
 
       const drawTickLarge = ( X: number, Y: number ) => {
+         ctx.lineWidth = 4;
          ctx.beginPath();
-         ctx.moveTo( X * ( radius - 15 ), Y * ( radius - 15 ));
-         ctx.lineTo( X * ( radius - 40 ), Y * ( radius - 40 ));
+         ctx.moveTo( X * ( radius * 0.85 ), Y * ( radius * 0.85 ));
+         ctx.lineTo( X * ( radius * 0.69 ), Y * ( radius * 0.69 ));
          ctx.stroke();
       };
 
@@ -171,8 +170,8 @@ export class AptitudIndicator {
 
          ctx.lineWidth = 5;            
          ctx.beginPath();
-         ctx.moveTo( X * ( radius - 15 ), Y * ( radius - 15 ));
-         ctx.lineTo( X * ( radius - 40 ), Y * ( radius - 40 ));
+         ctx.moveTo( X * ( radius * 0.85 ), Y * ( radius * 0.85 ));
+         ctx.lineTo( X * ( radius * 0.69 ), Y * ( radius * 0.69 ));
          ctx.stroke();
 
          ctx.restore();
@@ -186,7 +185,6 @@ export class AptitudIndicator {
       };
 
       graduations.forEach(({ angle, type }) => {
-         ctx.lineWidth = 3;
          const { cosSup, senSup, cosInf, senInf } = getVector( angle );
          graduationsDrawers[ type ]?.( cosSup, senSup );
          graduationsDrawers[ type ]?.( cosInf, senInf );         
@@ -201,89 +199,79 @@ export class AptitudIndicator {
    };
 
    private drawPitchIndicatorBase() {
-      const { ctx, radius, gradient, posX, posY, rollAngle, pitchAngle } = this;
-      const newPosX = 0, newPosY = 0;
+      const { ctx, radius, center, rollAngle, pitchAngle } = this;
+      const subRadius = radius * 0.7;
+      const maxPitchAngle = 45;
+      const pitchInPercentage = pitchAngle / maxPitchAngle;
 
       ctx.save();
-      ctx.translate( posX, posY );
+      ctx.translate( center.x, center.y );
       ctx.rotate( angARad( rollAngle ));
-      ctx.translate( newPosX, pitchAngle * 2 );
+      
+      const gradient = ctx.createLinearGradient( 0, -subRadius, 0, subRadius);
+      gradient.addColorStop( 0, colors.sky );
+      gradient.addColorStop( 0.5 + ( pitchInPercentage / 2 ), colors.sky );
+      gradient.addColorStop( 0.5 + ( pitchInPercentage / 2 ), colors.ground );
+      gradient.addColorStop( 1, colors.ground );
       
       ctx.fillStyle = gradient;
-      ctx.strokeStyle = 'black';
 
       ctx.beginPath();
-      ctx.arc( newPosX, newPosY, radius - 40, angARad( 0 ), angARad( 360 ));
+      ctx.arc( 0, 0, subRadius, angARad( 0 ), angARad( 360 ));
       ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc( newPosX, newPosY, radius - 40, angARad( 0 ), angARad( 360 ));
-      ctx.stroke();
 
       ctx.restore();
    };
-
+   
    private drawPitchIndicatorGraduation() {
-      const { ctx, radius, posX, posY, rollAngle, pitchAngle } = this;
-      const newPosX = 0, newPosY = 0;
+      const { ctx, radius, center, rollAngle, pitchAngle } = this;
+      const subRadius = radius * 0.7;
+      const maxPitchAngle = 45;
 
       ctx.save();
-      ctx.translate( posX, posY );
-      ctx.rotate( angARad( rollAngle ));      
-      ctx.translate( newPosX, pitchAngle * 2 );
-      
-      ctx.strokeStyle = 'white';
+      ctx.translate(center.x, center.y);
+      ctx.rotate(angARad(rollAngle));
+
+      ctx.strokeStyle = colors.graduation;
       ctx.lineWidth = 2;
 
+      const yCenter = pitchAngle / maxPitchAngle * subRadius;
       ctx.beginPath();
-      ctx.moveTo( newPosX - radius + 40, newPosY );
-      ctx.lineTo( newPosX + radius - 40, newPosY );
+      ctx.moveTo( -subRadius, yCenter );
+      ctx.lineTo( subRadius, yCenter );
       ctx.stroke();
 
-      for( let i = 1; i < 5 ; i++ ) {
-         const isPair = i % 2 == 0;
+      const tickAngles = [ 5, 10, 15, 20 ];
+      tickAngles.forEach( angleOffset => {
+         const yUp = ( angleOffset + pitchAngle ) / maxPitchAngle * subRadius;
+         const yDown = ( pitchAngle - angleOffset ) / maxPitchAngle * subRadius;
 
-         if( isPair ) {
-            ctx.beginPath();
-            ctx.moveTo( newPosX - ( 9 * i ), newPosY - ( 10 * i ));
-            ctx.lineTo( newPosX + ( 9 * i ), newPosY - ( 10 * i ));
-            ctx.stroke();
+         const isPair = angleOffset % 2 === 0;
+         const length = isPair ? 35 : 15;
+         const half = length / 2;
 
-            ctx.beginPath();
-            ctx.moveTo( newPosX - ( 9 * i ), newPosY + ( 10 * i ));
-            ctx.lineTo( newPosX + ( 9 * i ), newPosY + ( 10 * i ));
-            ctx.stroke();
-         } else {
-            ctx.beginPath();
-            ctx.moveTo( newPosX - 7, newPosY - ( 10 * i ));
-            ctx.lineTo( newPosX + 7, newPosY - ( 10 * i ));
-            ctx.stroke();
+         ctx.beginPath();
+         ctx.moveTo( -half, yUp );
+         ctx.lineTo( half, yUp );
+         ctx.stroke();
 
-            ctx.beginPath();
-            ctx.moveTo( newPosX - 7, newPosY + ( 10 * i ));
-            ctx.lineTo( newPosX + 7, newPosY + ( 10 * i ));
-            ctx.stroke();
-         }         
-      };
+         ctx.beginPath();
+         ctx.moveTo( -half, yDown );
+         ctx.lineTo( half, yDown );
+         ctx.stroke();
+      });
 
       ctx.restore();
    };
 
    private drawPitchIndicator() {
-      const { pitchAngle } = this;
-      if( pitchAngle > 20 )
-         this.pitchAngle = 20;
-      if( pitchAngle < -20 )
-         this.pitchAngle = -20;
+      const { pitchAngle } = this, maxAngle = 45;
+
+      if( pitchAngle > maxAngle ) this.pitchAngle = maxAngle;
+      if( pitchAngle < -maxAngle ) this.pitchAngle = -maxAngle;
+
       this.drawPitchIndicatorBase();
       this.drawPitchIndicatorGraduation();
-   };
-
-   public draw() {
-      this.drawStaticBG();
-      this.drawPitchIndicator();
-      this.drawRollIndicator();
-      this.drawStaticFrame();
    };
 
    private set setRollAngle( rollAngle: number ) {
@@ -294,10 +282,18 @@ export class AptitudIndicator {
       this.pitchAngle = pitchAngle;
    };
 
+   public draw() {
+      this.drawStaticBG();
+      this.drawPitchIndicator();
+      this.drawRollIndicator();
+      this.drawStaticFrame();
+   };
+
    public updateAptitudIndicator( rollAngle: number, pitchAngle: number ){
       this.setRollAngle = rollAngle;
       this.setPitchAngle = pitchAngle;
-
+      const size = this.radius * 2;
+      this.ctx.clearRect( 0, 0, size, size );
       this.draw();
-   }   
+   }; 
 };

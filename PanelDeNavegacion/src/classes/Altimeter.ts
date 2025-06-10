@@ -1,62 +1,49 @@
-import type { InstrumentalProps } from "../interfaces";
-import { angARad } from "../services";
+import type { CenterPoint, ConstructorProps } from "../interfaces";
+import { angARad, colors, commonStyles } from "../services";
 
 export class Altimeter {
    private ctx: CanvasRenderingContext2D;
-   private radius = 135;
-   private posX: number;
-   private posY: number;
+   private radius: number;
+   private center: CenterPoint;
    private altitud = 0;
    // altitud: distancia vertical entre el nivel medio del mar y un punto en el aire.
    // altura: distancia vertical entre el terreno y un punto en el aire.
    // elevacion: distancia entre el nivel medio del mar y un punto en el terreno.
 
-   constructor({ ctx, posX, posY }: InstrumentalProps) {
+   constructor({ ctx, size }: ConstructorProps) {
       this.ctx = ctx;
-      this.posX = posX;
-      this.posY = posY;
+      this.radius = size / 2;
+      this.center = {
+         x: this.radius,
+         y: this.radius
+      };
    };
 
    private drawStaticFrame() {
-      const { ctx, radius, posX, posY } = this;      
+      const { ctx, radius, center } = this;      
 
       ctx.beginPath();
-      ctx.arc( posX, posY, radius, 0, Math.PI * 2 );
-      ctx.fillStyle = 'black';
+      ctx.arc( center.x, center.y, radius, 0, Math.PI * 2 );
+      ctx.fillStyle = colors.border;
       ctx.fill();
 
       ctx.beginPath();
-      ctx.arc( posX, posY, (radius - 10 ), 0, Math.PI * 2 );
-      ctx.fillStyle = '#151515';
+      ctx.arc( center.x, center.y, ( radius * 0.89 ), 0, Math.PI * 2 );
+      ctx.fillStyle = colors.background;
       ctx.fill();  
 
       ctx.beginPath();
-      ctx.arc( posX, posY, 50, 0, Math.PI * 2 );
-      ctx.fillStyle = 'black';
+      ctx.arc( center.x, center.y, ( radius * 0.4 ), 0, Math.PI * 2 );
+      ctx.fillStyle = colors.border;
       ctx.fill();
    };
 
    private drawGraduation() {
-      const { ctx, radius, posX, posY } = this;
+      const { ctx, radius, center } = this;
 
-      ctx.strokeStyle = 'white';
+      ctx.strokeStyle = colors.graduation;
+      ctx.lineCap = "round";
       ctx.lineWidth = 2.5;
-
-      const drawSmallBrand = ( angle: number ) => {
-         const angInRad = angARad( angle );
-         const cos = Math.cos( angInRad ), sen = Math.sin( angInRad );
-
-         ctx.beginPath();
-         ctx.moveTo( 
-            posX + ( cos * ( radius - 16 ) ), 
-            posY + ( sen * ( radius - 16 ) )
-         );
-         ctx.lineTo( 
-            posX + ( cos * ( radius - 27 ) ), 
-            posY + ( sen * ( radius - 27 ) )
-         );
-         ctx.stroke();
-      };
 
       const drawMediumBrand = ( angle: number ) => {
          const angInRad = angARad( angle );
@@ -64,12 +51,12 @@ export class Altimeter {
 
          ctx.beginPath();
          ctx.moveTo( 
-            posX + ( cos * ( radius - 16 ) ), 
-            posY + ( sen * ( radius - 16 ) )
+            center.x + ( cos * ( radius * 0.85 )), 
+            center.y + ( sen * ( radius * 0.85 ))
          );
          ctx.lineTo( 
-            posX + ( cos * ( radius - 32 ) ), 
-            posY + ( sen * ( radius - 32 ) )
+            center.x + ( cos * ( radius * 0.75 )), 
+            center.y + ( sen * ( radius * 0.75 ))
          );
          ctx.stroke();
       };
@@ -80,12 +67,12 @@ export class Altimeter {
 
          ctx.beginPath();
          ctx.moveTo( 
-            posX + ( cos * ( radius - 16 ) ), 
-            posY + ( sen * ( radius - 16 ) )
+            center.x + ( cos * ( radius * 0.85 )), 
+            center.y + ( sen * ( radius * 0.85 ))
          );
          ctx.lineTo( 
-            posX + ( cos * ( radius - 42 ) ), 
-            posY + ( sen * ( radius - 42 ) )
+            center.x + ( cos * ( radius * 0.69 )), 
+            center.y + ( sen * ( radius * 0.69 ))
          );
          ctx.stroke();
       };
@@ -99,103 +86,120 @@ export class Altimeter {
          const isMajor = i % majorStep === 0;
          const brandAngle = step * i - 90;
          
-         
-         if(( i > 10 && i < 15 ))
-            drawSmallBrand( brandAngle );
-         else if( isMajor ) 
+         if( isMajor ) 
             drawLargeBrand( brandAngle );
          else
             drawMediumBrand( brandAngle );
-
       };
    };
 
    private drawNumbers() {      
-      const { ctx, radius, posX, posY } = this;
+      const { ctx, radius, center } = this;
 
-      ctx.fillStyle = '#fff';
-      ctx.font = '700 26px system-ui';
+      ctx.fillStyle = colors.numbers;
+      ctx.font = commonStyles.numbersFont;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
       const numbers = 10;
       const radRange = 360;
       const step = radRange / numbers;
-      const textRadius = radius - 57;
+      const textRadius = radius * 0.55;
       
       for (let i = 0; i < numbers; i++) {
          const brandAngle = ( step * i ) - 90;
          const angInRad = angARad( brandAngle );
          const cos = Math.cos( angInRad ), sin = Math.sin( angInRad );
 
-         const x = posX + cos * textRadius;
-         const y = posY + 1 + sin * textRadius;
+         const x = center.x + cos * textRadius;
+         const y = center.y + 1 + sin * textRadius;
 
          ctx.fillText( i.toString(), x, y );
       };
    };
 
-   private drawNeedles() {
-      const { ctx, radius, posX, posY, altitud } = this;
+   private drawLegends() {
+      const { ctx, radius, center } = this;
 
-      if( altitud > 99 ) return;
+      ctx.fillStyle = colors.numbers;
+      ctx.font = commonStyles.altimeterLegendsFont;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.save();
+      ctx.translate( center.x, center.y );
+
+      ctx.fillText( "ALT", ( -radius * 0.15 ), ( -radius * 0.2 ));
+      ctx.font = commonStyles.legendsFont;
+      ctx.fillText( "m", ( radius * 0.1 ), ( -radius * 0.65 ));
+
+      ctx.restore();
+   };
+
+   private drawNeedles() {
+      const { ctx, radius, center, altitud } = this;
+
       const firstDigit = altitud % 10;
-      const secondDigit = ( altitud % 100 - firstDigit ) / 10;
+      const secondDigit = ( altitud - firstDigit ) / 10;
 
       const rangeRad = angARad( 360 );
       const maxValue = 10;
 
       const drawLargeNeedle = () => {
          const valueAng = ( firstDigit / maxValue ) * rangeRad;
+         const gradient = ctx.createLinearGradient( 0, -120, 0, 50 );
+         gradient.addColorStop( 0, colors.whiteNeedle );
+         gradient.addColorStop( 0.68, colors.whiteNeedle );
+         gradient.addColorStop( 0.68, colors.blackNeedle );
+         ctx.fillStyle = gradient;
+         ctx.strokeStyle = colors.blackNeedle;
+         ctx.lineWidth = 1;
 
          ctx.save();
-         ctx.translate( posX, posY );
+         ctx.translate( center.x, center.y );
          ctx.rotate( valueAng );
 
-         ctx.fillStyle = '#e9e9e9'
-         ctx.lineWidth = 4;
          ctx.beginPath();
-         ctx.moveTo( 4, -15 );
-         ctx.lineTo( 4, 55 - radius);
-         ctx.lineTo( 0, 35 - radius);
-         ctx.lineTo( -4, 55 - radius );
-         ctx.lineTo( -4, -15  );
-         ctx.stroke();
-
-         ctx.fillStyle = '#333'
-         ctx.beginPath();
-         ctx.moveTo( 5, -15 );
-         ctx.lineTo( 5, radius - 90 );
-         ctx.arc( 0, radius - 90, 10, 0, angARad( 360 ));
-         ctx.lineTo( -5, radius - 90 );
-         ctx.lineTo( -5, -15 );
+         
+         ctx.moveTo( 0, 45 );
+         ctx.arc( 0, 45, ( radius * 0.05), angARad( -65 ), angARad( 245 ));
+         ctx.lineTo( -3, -5 );
+         ctx.lineTo( -5, -5 );
+         ctx.lineTo( -5, -60 );
+         ctx.lineTo( -4, -radius * 0.55 );
+         ctx.lineTo( 0, -radius * 0.75 );
+         ctx.lineTo( 4, -radius * 0.55 );
+         ctx.lineTo( 5, -60 );
+         ctx.lineTo( 5, -5 );
+         ctx.lineTo( 3, -5 );
+         ctx.lineTo( 3, 45 );
          ctx.fill();
+         ctx.stroke();
 
          ctx.restore();
       };
 
       const drawShortNeedle = () => {
          const valueAng = ( secondDigit / maxValue ) * rangeRad;
+         const gradient = ctx.createLinearGradient( 0, -120, 0, 50 );
+         gradient.addColorStop( 0, colors.whiteNeedle );
+         gradient.addColorStop( 0.68, colors.whiteNeedle );
+         gradient.addColorStop( 0.68, colors.blackNeedle );
+         ctx.fillStyle = gradient;
 
          ctx.save();
-         ctx.translate( posX, posY );
+         ctx.translate( center.x, center.y );
          ctx.rotate( valueAng );
 
-         ctx.strokeStyle = '#d5d5d5';
-         ctx.lineWidth = 4;
          ctx.beginPath();
          ctx.moveTo( 6, -10 );
          ctx.lineTo( 15, -40);
          ctx.lineTo( 0, -60);
          ctx.lineTo( -15, -40);
          ctx.lineTo( -6, -10);
-         ctx.stroke();
-
-         ctx.fillStyle = '#222'
-         ctx.beginPath();
          ctx.moveTo( 6, -10 );
          ctx.lineTo( 6, 5);
-         ctx.arc( 0, 0, 30, angARad( 62 ), angARad( 115 ));
+         ctx.arc( 0, 0, ( radius * 0.22 ), angARad( 62 ), angARad( 115 ));
          ctx.lineTo( -6, 5);
          ctx.lineTo( -6, -10);
          ctx.fill();
@@ -208,6 +212,7 @@ export class Altimeter {
    };
 
    private set setAltitud( altitud: number ) {
+      if( altitud > 99 ) altitud = 99;
       this.altitud = altitud;
    };
 
@@ -215,6 +220,7 @@ export class Altimeter {
       this.drawStaticFrame();
       this.drawGraduation();
       this.drawNumbers();
+      this.drawLegends();
       this.drawNeedles();
    };
 
