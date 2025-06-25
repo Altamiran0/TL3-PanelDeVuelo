@@ -1,0 +1,15 @@
+.navigationDashboard {
+   place-self: center;
+   margin: 20px;
+   display: grid;
+   grid-template-columns: minmax( 550px, 1fr ) minmax( 400px, 2fr );
+   place-content: center;
+   gap: 15px; 
+}
+
+.navigationDashboard > :nth-child( 3 ) { grid-column: 2 / -1; grid-row: 1 / 3 }
+
+@media ( width < 1020px ) {
+   .navigationDashboard { grid-template-columns: 1fr }
+   .navigationDashboard > :nth-child( 3 ) { grid-column: 1 / -1; grid-row: 3 / 4  }
+}

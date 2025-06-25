@@ -1,0 +1,37 @@
+.appHeader {
+   padding: 10px 25px;
+   border-bottom: 1px solid #717ba4;
+   backdrop-filter: contrast( 90% );
+   line-height: 46px;
+   display: grid;   
+   align-items: center;
+   justify-content: space-between;
+   grid-template-rows: 1fr 1fr;
+}
+
+.textState {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   grid-column: 2 / 3;
+   grid-row: 1 / -1;
+}
+
+.state {
+   display: block;
+   width: 10px;
+   height: 10px;
+   border-radius: 50%;
+}
+
+.isConnected { background-color: #0ac91a }
+.noConnected { background-color: #c90a0a }
+
+@media ( width < 570px ) {
+   .appHeader { 
+      padding: 25px; 
+      grid-template-rows: 1fr;
+   }
+
+   h3 { display: none }
+}

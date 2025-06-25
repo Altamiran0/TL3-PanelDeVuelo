@@ -1,0 +1,19 @@
+.map {
+   border-radius: 10px;
+   border: 1px solid #586081;
+   backdrop-filter: contrast( 90% );
+   width: 100%;
+   min-height: 500px;
+}
+
+.positionCard {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   width: 150px;
+   padding: 5px 20px;
+   border-radius: 0 0 10px 0;
+   border-bottom: 1px solid #586081;
+   border-right: 1px solid #586081;
+   backdrop-filter: contrast( 100% );
+}
