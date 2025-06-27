@@ -26,6 +26,7 @@
 
 .isConnected { background-color: #0ac91a }
 .noConnected { background-color: #c90a0a }
+.GPSmoduleDontWork { background-color: #ef9206 }
 
 @media ( width < 570px ) {
    .appHeader { 
