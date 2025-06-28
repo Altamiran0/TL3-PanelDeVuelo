@@ -26,8 +26,7 @@ function useAircraftData() {
                         lat: pos.coords.latitude,
                         lng: pos.coords.longitude,
                      })
-                  }, geoError => 
-                     setError(`${ geoError.code }: ${ geoError.message }`)
+                  }
                );
             } else setAircraftData( data );
          } catch( parceError ) { 

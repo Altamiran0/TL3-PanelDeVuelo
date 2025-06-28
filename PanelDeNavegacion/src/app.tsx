@@ -1,9 +1,9 @@
 import { AppHeader, InstrumentalPanel, DigitalPanel, CurrentMap } from "./components";
-import { useWebsocket } from "./hooks"
+import { useAircraftData } from "./hooks"
 import "./app.css"
 
 export function App() {
-  const { aircraftData, isLoading, error } = useWebsocket();
+  const { aircraftData, isLoading, error } = useAircraftData();
 
   if( isLoading ) return <div>Cargando datos...</div>;
   if( error ) return <div>{ error }</div>

@@ -1,1 +1,1 @@
-export { default as useWebsocket } from './useWebsocket'
+export { default as useAircraftData } from './useAircraftData'
