@@ -25,3 +25,15 @@ export const commonStyles = {
 export function angARad( angulo: number ){
    return angulo * Math.PI / 180;
 };
+
+export const initialAircraftData = {
+   isConnected: false,
+   GPSmodule_isWork: false,
+   windSpeed: 0,
+   verticalSpeed: 0,
+   altitud: 0,
+   pitchAngle: 0,
+   rollAngle: 0,
+   lat: 0,
+   lng: 0
+};

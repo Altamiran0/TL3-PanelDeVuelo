@@ -1,8 +1,11 @@
 import './AppHeader.css';
 
-function AppHeader () {
-   const isConnected = true;
-   const GPSmodule_isWork = false
+interface Props {
+   isConnected: boolean,
+   GPSmodule_isWork: boolean
+}
+
+function AppHeader ({ isConnected, GPSmodule_isWork }: Props) {
    return (
    <header className={ "appHeader" }>
       <h1>Panel de Navegacion</h1>

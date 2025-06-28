@@ -6,14 +6,26 @@ import {
 } from "../";
 import "./InstrumentalPanel.css";
 
-function InstrumentalPanel() {
+interface Props {
+  windSpeed: number,
+  pitchAngle: number,
+  rollAngle: number,
+  altitud: number,
+  verticalSpeed: number
+}
+
+function InstrumentalPanel({ windSpeed, pitchAngle, rollAngle, altitud, verticalSpeed }: Props) {
   return (
     <>
     <div className={ 'InstrumentalPanel' }>
-      <AnemometerCanvas size={ 250 } windSpeed={ 0 } />
-      <AptitudIndicatorCanvas size={ 250 } pitchAngle={ 0 } rollAngle={ 0 } />
-      <AltimeterCanvas size={ 250 } altitud={ 0 } />
-      <VerticalSpeedIndicatorCanvas size={ 250 } verticalSpeed={ 0 } />
+      <AnemometerCanvas 
+        size={ 250 } windSpeed={ windSpeed } />
+      <AptitudIndicatorCanvas 
+        size={ 250 } pitchAngle={ pitchAngle } rollAngle={ rollAngle } />
+      <AltimeterCanvas 
+        size={ 250 } altitud={ altitud } />
+      <VerticalSpeedIndicatorCanvas 
+        size={ 250 } verticalSpeed={ verticalSpeed } />
     </div>
     </>
   )

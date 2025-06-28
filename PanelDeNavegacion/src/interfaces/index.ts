@@ -22,3 +22,15 @@ export interface ConstructorProps {
    ctx: CanvasRenderingContext2D,
    size: number
 };
+
+export interface NavData {
+   isConnected: boolean,
+   GPSmodule_isWork: boolean,
+   windSpeed: number,   
+   altitud: number,
+   verticalSpeed: number,
+   rollAngle: number,
+   pitchAngle: number,
+   lat: number,
+   lng: number
+};
