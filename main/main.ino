@@ -9,8 +9,8 @@
 #include <MPU6050.h>
 
 // ————— CONFIG Wi‑Fi —————
-const char* ssid     = "MovistarFibra-2022";
-const char* password = "23452345";
+const char* ssid     = "ParaElWemos";
+const char* password = "PanelDeVuelo";
 
 // ————— Sensores —————
 Adafruit_BMP280 bmp;
