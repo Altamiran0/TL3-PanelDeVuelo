@@ -17,18 +17,14 @@ function useAircraftData() {
       webSocket.onmessage = ( e: MessageEvent ) => {
          try {
             const data = JSON.parse( e.data ) as NavData;
-
-            if ( !data.GPSmodule_isWork && navigator.geolocation ) {
-               navigator.geolocation.getCurrentPosition( 
-                  pos => { 
-                     setAircraftData({
-                        ...data,
-                        lat: pos.coords.latitude,
-                        lng: pos.coords.longitude,
-                     })
-                  }
-               );
-            } else setAircraftData( data );
+            setAircraftData( data );
+            if( !data.GPSmodule_isWork ) {
+               setAircraftData({
+                  ...data,
+                  lat: -34.6689081,
+                  lng: -58.3986221,
+               })
+            }
          } catch( parceError ) { 
             if( parceError instanceof Error )
                setError( parceError.message );
